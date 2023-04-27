@@ -28,6 +28,10 @@ runs:
         popd
         rm -fR __prep__
 
+    - name: "[darwin] update environemnt variables"
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
         echo 'PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:$PKG_CONFIG_PATH' >> $GITHUB_ENV
 
     - name: "[windows] Install library dependencies"
@@ -54,16 +58,15 @@ runs:
         popd
         rm -fR __prep__
 
-        echo 'PKG_CONFIG_PATH=C:\\msys64\mingw64\opt\cardano\lib\pkgconfig' >> $GITHUB_ENV
-
-    - name: "[windows] update PATH"
+    - name: "[windows] update environemnt variables"
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
         # Add the `bin` folder, which contains all the .dlls on windows, so we
         # can find them.
-        $NewPath = "C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH
-        "PATH=$NewPath" >> $env:GITHUB_ENV
+        "PATH=C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH           >> $env:GITHUB_ENV
+        "PKG_CONFIG_PATH=C:\\msys64\mingw64\opt\cardano\lib\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
+
 
     - name: "[linux] Install library dependencies"
       if: runner.os == 'Linux'
@@ -80,5 +83,9 @@ runs:
         popd
         rm -fR __prep__
 
+    - name: "[linux] update environemnt variables"
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
         echo 'PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:$PKG_CONFIG_PATH' >> $GITHUB_ENV
         echo 'LD_LIBRARY_PATH=/usr/local/opt/cardano/lib:$LD_LIBRARY_PATH'           >> $GITHUB_ENV
