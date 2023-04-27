@@ -55,9 +55,14 @@ runs:
         rm -fR __prep__
 
         echo 'PKG_CONFIG_PATH=C:\\msys64\mingw64\opt\cardano\lib\pkgconfig' >> $GITHUB_ENV
+
+    - name: "[windows] update PATH"
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
         # Add the `bin` folder, which contains all the .dlls on windows, so we
         # can find them.
-        echo "/c/msys64/mingw64/opt/cardano/bin:$PATH"                      >> $GITHUB_ENV
+        'PATH=("C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH)' >> $env:GITHUB_ENV
 
     - name: "[linux] Install library dependencies"
       if: runner.os == 'Linux'
