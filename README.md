@@ -12,7 +12,7 @@ See [iohk-nix/releases](https://github.com/input-output-hk/iohk-nix/releases/tag
 
 ```
 - name: Install system dependencies
-  uses: input-output-hk/base@latest
+  uses: input-output-hk/actions/base@latest
   with:
     use-sodium-vrf: false # default is true
 ```
@@ -23,7 +23,7 @@ This action will install ghc and cabal as needed
 
 ```
 - name: Install Haskell
-  uses: input-output-hk/setup-haskell@v1
+  uses: input-output-hk/actions/haskell@latest
   with:
     ghc-version: ${{ matrix.ghc }}
     cabal-version: 3.10.1.0
