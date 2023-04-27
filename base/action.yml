@@ -62,7 +62,8 @@ runs:
       run: |
         # Add the `bin` folder, which contains all the .dlls on windows, so we
         # can find them.
-        'PATH=("C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH)' >> $env:GITHUB_ENV
+        $NewPath = "C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH
+        "PATH=$NewPath" >> $env:GITHUB_ENV
 
     - name: "[linux] Install library dependencies"
       if: runner.os == 'Linux'
