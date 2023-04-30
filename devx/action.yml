@@ -40,5 +40,4 @@ runs:
       shell: bash
       run: |
         ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal && '-minimal' || '' }}${{ inputs.iog && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
-        sudo ln -s $(tail -n 1 store-paths.txt) /usr/local/bin/devx-env.sh
-        sudo cp ${{ github.action_path }}/support/devx /usr/local/bin
+        sudo ln -s $(tail -n 1 store-paths.txt) /usr/local/bin/devx
