@@ -6,7 +6,7 @@ inputs:
     default: true
   url-prefix:
     description: Location to pull the pkgs from
-    default: https://github.com/input-output-hk/iohk-nix/releases/download/latest
+    default: https://github.com/input-output-hk/iohk-nix/releases/latest/download
 
 runs:
   using: "composite"
