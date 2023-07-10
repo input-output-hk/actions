@@ -21,7 +21,7 @@ See [iohk-nix/releases](https://github.com/input-output-hk/iohk-nix/releases/tag
 
 This GitHub Action let you run commands into [the slightly opinionated `devx` shell](https://github.com/input-output-hk/devx) for Cardano-Haskell projects. The action takes the following inputs:
 
-| Input name | Description | Default value |
+| Key | Description | Default value |
 | - | - | - |
 | `platform` | Specifies the architecture and operating system for the build. Accepted values are `x86_64-linux`, `x86_64-darwin`, `aarch64-linux`, or `aarch64-darwin`. | `x86_64-linux` |
 | `target-platform` | Indicates the target platform for the build, which can be native, static (`-static`), Windows (`-windows`), or JavaScript (`-js`). | native (empty string) |
