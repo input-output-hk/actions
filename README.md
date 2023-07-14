@@ -33,7 +33,7 @@ Here's how you might utilize this action in your workflow:
 
 ```yaml
 - name: Build
-  uses: input-output-hk/actions/base@latest
+  uses: input-output-hk/actions/devx@latest
   with:
     platform: 'x86_64-linux'
     target-platform: '-windows'
