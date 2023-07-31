@@ -9,6 +9,10 @@ inputs:
     description: Version of cabal to install
     default: ''
 
+  pacman-packages:
+    description: Pacman packages to install
+    default: ''
+
 outputs:
   cabal-store:
     description: "Prefix"
@@ -26,6 +30,13 @@ runs:
       if: inputs.cabal-version != ''
       shell: bash
       run: ghcup install cabal --set ${{ inputs.cabal-version }}
+
+    - name: "WIN: Install System Dependencies via pacman (msys2)"
+      if: runner.os == 'Windows' && inputs.pacman-packages != ''
+      shell: 'C:/msys64/usr/bin/bash.exe -e {0}'
+      run: |
+         printf "::warning::pacman packages will be installed via the input-output-hk/actions/haskell workflow.\nHowever there is no need to do it here and in general it is better to just do it on your workflow using \`/usr/bin/pacman -S -noconfirm %s\`.\nWe might remove this feature soon so please do as advised.\n\nA full step you can copy-paste into your workflow would look as follows:\n\`\`\`\n    - name: \"WIN: Install System Dependencies via pacman (msys2)\"\n      if: runner.os == 'Windows'\n      shell: 'C:/msys64/usr/bin/bash.exe -e {0}'\n      run: |\n        /usr/bin/pacman -S -noconfirm %s\n\`\`\`\n" "$(echo "${{ inputs.pacman-packages }}" | head -c -1)" "$(echo "${{ inputs.pacman-packages }}" | head -c -1)"
+         /usr/bin/pacman --noconfirm -S ${{ inputs.pacman-packages }}
 
     # Unify the computation of the cabal store directory to a single step. This makes referencing the cabal
     # store in later steps easier.
