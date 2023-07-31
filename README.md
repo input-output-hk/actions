@@ -6,7 +6,10 @@ This action will install the system dependencies we have:
 
 - libsodium
 - libsecp256k1
+- pkg-config
+- openssl
 - libblst
+- libsystemd (on Linux only)
 
 See [iohk-nix/releases](https://github.com/input-output-hk/iohk-nix/releases/tag/latest)
 
@@ -19,7 +22,7 @@ See [iohk-nix/releases](https://github.com/input-output-hk/iohk-nix/releases/tag
 
 ## haskell action
 
-This action will install ghc and cabal as needed
+This action will set ghc and cabal as needed
 
 ```
 - name: Install Haskell
@@ -27,5 +30,4 @@ This action will install ghc and cabal as needed
   with:
     ghc-version: ${{ matrix.ghc }}
     cabal-version: 3.10.1.0
-    pacman-packages: ... # more pacman package to install
 ```
