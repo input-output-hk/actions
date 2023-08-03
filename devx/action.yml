@@ -41,3 +41,4 @@ runs:
       run: |
         ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal && '-minimal' || '' }}${{ inputs.iog && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
         sudo ln -s $(tail -n 1 store-paths.txt) /usr/local/bin/devx
+        sudo chmod +x /usr/local/bin/devx
