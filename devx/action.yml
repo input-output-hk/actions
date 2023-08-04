@@ -40,4 +40,6 @@ runs:
       shell: bash
       run: |
         ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal && '-minimal' || '' }}${{ inputs.iog && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
-        sudo ln -s $(tail -n 1 store-paths.txt) /usr/local/bin/devx
+        DEVX_DRV=$(tail -n 1 store-paths.txt)
+        if [[ ! $DEVX_DRV =~ "devx" ]]; then exit 1; fi
+        sudo ln -s $DEVX_DRV /usr/local/bin/devx
