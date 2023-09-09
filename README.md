@@ -62,5 +62,4 @@ This action will set ghc and cabal as needed
   with:
     ghc-version: ${{ matrix.ghc }}
     cabal-version: 3.10.1.0
-    pacman-packages: ... # more pacman package to install
 ```
