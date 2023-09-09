@@ -41,5 +41,9 @@ runs:
       run: |
         ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal && '-minimal' || '' }}${{ inputs.iog && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
         DEVX_DRV=$(tail -n 1 store-paths.txt)
+        # assert that the last path is actually the 'devx' script. If not we should not push this closure
+        # as it will result in us uploading broken closures, that can not be used. We expect the last path
+        # to be the devx script when pulling the pseudo-docker images down, and importing it into the
+        # /nix/store. If it's anything else, we'll end up with all kinds of weird behaviours.
         if [[ ! $DEVX_DRV =~ "devx" ]]; then exit 1; fi
         sudo ln -s $DEVX_DRV /usr/local/bin/devx
