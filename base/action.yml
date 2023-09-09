@@ -1,5 +1,5 @@
-name: 'Setup IOG librararies'
-description: 'Installs libsodum, libsecp256k1 and libblst'
+name: 'Setup IOG libraries'
+description: 'Installs a set of libraries our projects usually depend on'
 inputs:
   use-sodium-vrf:
     description: Use libsodium with VRF extension
@@ -28,24 +28,38 @@ runs:
         popd
         rm -fR __prep__
 
-    - name: "[darwin] update environemnt variables"
+    - name: "[darwin] update environment variables"
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        echo 'PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:$PKG_CONFIG_PATH' >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=/usr/local/lib"                                                                                 >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
+    # There are three pkg-config packages available for mingw, and each one has their problems:
+    #
+    # - `pacman -S pkgconf` (usually pulled by installing `base-devel`): can't interpret the `PKG_CONFIG_PATH` in a semicolon format.
+    #   For `PKG_CONFIG_PATH=C:/pathA;C:/pathB` it searches in `C`, `/pathA;C` and `/pathB`.
+    #
+    # - `pacman -S mingw-w64-x86_64-pkgconf`: when queried for multiple modversions (as cabal does), it will return only one.
+    #
+    # - `pacman -S mingw-w64-x86_64-pkg-config`: will strip out `C:/mingw64/lib` and `C:/mingw64/include` from the returned values
+    #   unless provided with `PKG_CONFIG_ALLOW_SYSTEM_(CFLAGS|LIBS)` as I do here.
     - name: "[windows] Install library dependencies"
       if: runner.os == 'Windows'
       shell: C:/msys64/usr/bin/bash.exe -e '{0}'
       env:
-        MSYSTEM: MSYS
+        MSYSTEM: MINGW64
         # do not ever change to $HOME by yourself.
         CHERE_INVOKING: 1
         # do we want to inherit the path?
         # MSYS2_PATH_TYPE: inherit
       run: |
-        /usr/bin/pacman --noconfirm -S \
-          mingw-w64-x86_64-pkg-config
+        mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
+        mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
+
+        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-openssl
+        echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
+        echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
 
         mkdir __prep__
         pushd __prep__
@@ -58,20 +72,22 @@ runs:
         popd
         rm -fR __prep__
 
-    - name: "[windows] update environemnt variables"
+    # MSYS will inherit the PATH from PWSH, but not the other way round, and setting the path
+    # to "PATH=...:$PATH" in bash results in all the paths starting with `/c/` instead of `C:\` which
+    # makes some actions (like `actions/checkout`) fail as it cannot find executables.
+    - name: "[windows] update environment variables"
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Add the `bin` folder, which contains all the .dlls on windows, so we
-        # can find them.
-        "PATH=C:\\msys64\mingw64\opt\cardano\bin;C:\msys64\mingw64\bin;{0}" -f $env:PATH           >> $env:GITHUB_ENV
-        "PKG_CONFIG_PATH=C:\\msys64\mingw64\opt\cardano\lib\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
-
+        "PATH=C:\\msys64\\mingw64\\opt\\cardano\\bin;C:\\msys64\\mingw64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
+        "PKG_CONFIG_PATH=C:\\msys64\\mingw64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\mingw64\\lib\\pkgconfig;C:\\msys64\\mingw64\\share\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
 
     - name: "[linux] Install library dependencies"
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        sudo apt-get -y install libsystemd-dev
+
         mkdir __prep__
         pushd __prep__
           curl -sL ${{ inputs.url-prefix }}/debian.${{ inputs.use-sodium-vrf && 'libsodium-vrf' || 'libsodium' }}.deb > libsodium.deb
@@ -83,9 +99,9 @@ runs:
         popd
         rm -fR __prep__
 
-    - name: "[linux] update environemnt variables"
+    - name: "[linux] update environment variables"
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        echo 'PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:$PKG_CONFIG_PATH' >> $GITHUB_ENV
-        echo 'LD_LIBRARY_PATH=/usr/local/opt/cardano/lib:$LD_LIBRARY_PATH'           >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=/usr/local/opt/cardano/lib:$LD_LIBRARY_PATH"           >> $GITHUB_ENV
