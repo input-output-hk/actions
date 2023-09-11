@@ -32,8 +32,9 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        echo "LD_LIBRARY_PATH=/usr/local/lib"                                                                                 >> $GITHUB_ENV
-        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/usr/local/opt/openssl@1.1/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" \
+          >> $GITHUB_ENV
 
     # There are three pkg-config packages available for mingw, and each one has their problems:
     #
