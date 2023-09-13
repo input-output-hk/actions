@@ -1,0 +1,30 @@
+name: 'Wait for Hydra'
+description: 'Wait for hydra job to complete'
+inputs:
+  check:
+    description: 'Name of the hydra job when using GitHub Apps (check_runs)'
+    default: ''
+  
+  status:
+    description: 'Name of the hydra job when using GitHub Statuses'
+    default: ''
+  
+  delay:
+    description: 'Delay in seconds after unsuccessful query.'
+    default: 30
+  
+  jitter:
+    description: 'Jitter added to the delay. Maximum in seconds.'
+    default: 30
+
+runs:
+  using: "composite"  
+  steps:    
+  - name: Wait for Hydra Jobs ${{ inputs.check || inputs.status }}
+    shell: bash
+    env:
+      CHECK: ${{ inputs.check }}
+      STATUS: ${{ inputs.status }}
+      DELAY: ${{ inputs.delay }}
+      JITTER: ${{ inputs.jitter }}
+    run: ${{ github.action_path }}/support/wait.sh
