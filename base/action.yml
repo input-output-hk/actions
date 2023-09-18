@@ -87,6 +87,7 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        sudo apt-get update
         sudo apt-get -y install libsystemd-dev
 
         mkdir __prep__
