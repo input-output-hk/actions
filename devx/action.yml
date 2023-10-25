@@ -3,22 +3,27 @@ description: 'Adds a `devx` shell includes `ghc` and `cabal`'
 inputs:
   platform:
     description: 'One of x86_64-linux, x86_64-darwin, aarch64-linux, aarch64-darwin'
+    type: string
     default: 'x86_64-linux'
 
   target-platform:
     description: 'One of "" (native), "-static", "-windows" or "-js"'
+    type: string
     default: ''
 
   compiler-nix-name:
     description: 'The version of GHC to use'
+    type: string
     default: 'ghc961'
 
   minimal:
     description: 'Set to `false` to get hlint and hls'
+    type: boolean
     default: true
 
   iog:
     description: 'Set to `true` to get libsodum, libsecp256k1 and libblst'
+    type: boolean
     default: false
 
 runs:
@@ -39,7 +44,7 @@ runs:
     - name: Download and import closure
       shell: bash
       run: |
-        ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal && '-minimal' || '' }}${{ inputs.iog && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
+        ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal == 'true' && '-minimal' || '' }}${{ inputs.iog == 'true' && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
         DEVX_DRV=$(tail -n 1 store-paths.txt)
         # assert that the last path is actually the 'devx' script. If not we should not push this closure
         # as it will result in us uploading broken closures, that can not be used. We expect the last path

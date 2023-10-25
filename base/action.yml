@@ -3,9 +3,11 @@ description: 'Installs a set of libraries our projects usually depend on'
 inputs:
   use-sodium-vrf:
     description: Use libsodium with VRF extension
+    type: boolean
     default: true
   url-prefix:
     description: Location to pull the pkgs from
+    type: string
     default: https://github.com/input-output-hk/iohk-nix/releases/latest/download
 
 runs:
@@ -19,7 +21,7 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sL ${{ inputs.url-prefix }}/macos.${{ inputs.use-sodium-vrf && 'libsodium-vrf' || 'libsodium' }}.pkg > libsodium.pkg
+          curl -sL ${{ inputs.url-prefix }}/macos.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg > libsodium.pkg
           curl -sL ${{ inputs.url-prefix }}/macos.libsecp256k1.pkg > libsecp256k1.pkg
           curl -sL ${{ inputs.url-prefix }}/macos.libblst.pkg      > libblst.pkg
           for pkg in *.pkg; do
@@ -64,7 +66,7 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sL ${{ inputs.url-prefix }}/msys2.${{ inputs.use-sodium-vrf && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
+          curl -sL ${{ inputs.url-prefix }}/msys2.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
           curl -sL ${{ inputs.url-prefix }}/msys2.libsecp256k1.pkg.tar.zstd > libsecp256k1.pkg.tar.zstd
           curl -sL ${{ inputs.url-prefix }}/msys2.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
           for pkg in *.zstd; do
@@ -92,7 +94,7 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sL ${{ inputs.url-prefix }}/debian.${{ inputs.use-sodium-vrf && 'libsodium-vrf' || 'libsodium' }}.deb > libsodium.deb
+          curl -sL ${{ inputs.url-prefix }}/debian.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.deb > libsodium.deb
           curl -sL ${{ inputs.url-prefix }}/debian.libsecp256k1.deb > libsecp256k1.deb
           curl -sL ${{ inputs.url-prefix }}/debian.libblst.deb      > libblst.deb
           for pkg in *.deb; do
