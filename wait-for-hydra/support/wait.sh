@@ -5,11 +5,11 @@ while true; do
     if [ -z "$CHECK" ] && [ -z "$STATUS" ]; then (>&2 echo "Neither STATUS _or_ CHECK provided. Please provide one!"); exit 1; fi
     if [ -n "$CHECK" ] && [ -n "$STATUS" ]; then (>&2 echo "STATUS _and_ CHECK provided. Please provide only one!"); exit 1; fi
     # Note: we need --paginate because there are so many statuses
-    if [ -n "$CHECK" ]; then 
+    if [ -n "$CHECK" ]; then
         # For GitHub Apps (checks)
         HYDRA_JOB="$CHECK"
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status --paginate --jq '.check_runs[] | select(.name == \"$CHECK\") | .conclusion'"
-        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" --paginate --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion")
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs --paginate --jq '.check_runs[] | select(.name == \"$CHECK\") | .conclusion'"
+        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" --paginate --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion")
     else
         # For GitHub Statuses
         HYDRA_JOB="$STATUS"
