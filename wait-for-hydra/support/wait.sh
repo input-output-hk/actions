@@ -8,13 +8,13 @@ while true; do
     if [ -n "$CHECK" ]; then
         # For GitHub Apps (checks)
         HYDRA_JOB="$CHECK"
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs --paginate --jq '.check_runs[] | select(.name == \"$CHECK\") | .conclusion'"
-        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs" --paginate --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion")
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs --paginate --jq '.check_runs[] | select(.name == \"$CHECK\") | .conclusion'"
+        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs" --paginate --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion")
     else
         # For GitHub Statuses
         HYDRA_JOB="$STATUS"
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status --paginate --jq '.statuses[] | select(.context == \"$STATUS\") | .state'"
-        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" --paginate --jq ".statuses[] | select(.context == \"$STATUS\") | .state")
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status --paginate --jq '.statuses[] | select(.context == \"$STATUS\") | .state'"
+        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status" --paginate --jq ".statuses[] | select(.context == \"$STATUS\") | .state")
     fi
     case "$conclusion" in
         success)
