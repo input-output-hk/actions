@@ -4,12 +4,12 @@
 
 This action will install the system dependencies we have:
 
-- libsodium
-- libsecp256k1
-- pkg-config
-- openssl
-- libblst
-- libsystemd (on Linux only)
+- `libsodium`
+- `libsecp256k1`
+- `pkg-config`
+- `openssl`
+- `libblst`
+- `libsystemd` (on Linux only)
 
 See [iohk-nix/releases](https://github.com/input-output-hk/iohk-nix/releases/tag/latest)
 
@@ -54,7 +54,7 @@ In this example, the action is configured to build on an `x86_64-linux` host pla
 
 ## `haskell` action
 
-This action will set ghc and cabal as needed
+This action will set GHC and Cabal as needed
 
 ```
 - name: Install Haskell
