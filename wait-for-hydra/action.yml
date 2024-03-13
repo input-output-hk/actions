@@ -27,4 +27,5 @@ runs:
       STATUS: ${{ inputs.status }}
       DELAY: ${{ inputs.delay }}
       JITTER: ${{ inputs.jitter }}
+      RELEVANT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}      
     run: ${{ github.action_path }}/support/wait.sh
