@@ -26,6 +26,11 @@ inputs:
     type: boolean
     default: false
 
+  iog-full:
+    description: 'Set to `true` to get libsodum, libsecp256k1, libblst, posgresql and R'
+    type: boolean
+    default: false
+
 runs:
   using: "composite"
   steps:
@@ -44,7 +49,7 @@ runs:
     - name: Download and import closure
       shell: bash
       run: |
-        ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal == 'true' && '-minimal' || '' }}${{ inputs.iog == 'true' && '-iog' || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
+        ${{ github.action_path }}/support/fetch-docker.sh input-output-hk/devx ${{ inputs.platform }}.${{ inputs.compiler-nix-name }}${{ inputs.target-platform }}${{ inputs.minimal == 'true' && '-minimal' || '' }}${{ (inputs.iog-full == 'true' && '-iog-full') || (inputs.iog == 'true' && '-iog') || '' }}-env | zstd -d | nix-store --import | tee store-paths.txt
         DEVX_DRV=$(tail -n 1 store-paths.txt)
         # assert that the last path is actually the 'devx' script. If not we should not push this closure
         # as it will result in us uploading broken closures, that can not be used. We expect the last path
