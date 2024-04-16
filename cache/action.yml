@@ -8,9 +8,25 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Bootstrap devx shell
+      uses: input-output-hk/actions/devx@latest
+      with:
+        platform: 'x86_64-linux'
+        target-platform: ''
+        compiler-nix-name: ${{ inputs.ghc_version }}
+        minimal: false
+        iog: true
+    - name: Run HLS headless to generate hie-bios cache
+      shell: devx {0}
+      run: |
+        cabal update
+        cabal build all -j
+        timeout 15m haskell-language-server --project-ghc-version || true
     - name: Cache build artifacts (used to speed up GitHub Codespaces bootstrapping)
       uses: actions/upload-artifact@v4
       with:
         name: cache-${{ github.event.pull_request.head.sha || github.sha }}-${{ inputs.ghc_version }}
         path: |
           ./dist-newstyle
+          $HOME/.cabal-devx
+          $HOME/.cache
