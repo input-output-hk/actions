@@ -21,6 +21,17 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Install ghcup
+      shell: bash
+      run: |
+        if ! type ghcup &>/dev/null; then
+          curl -sSf https://get-ghcup.haskell.org |
+            BOOTSTRAP_HASKELL_NONINTERACTIVE=yes \
+            BOOTSTRAP_HASKELL_MINIMAL=yes \
+            bash
+          echo "PATH=$HOME/.ghcup/bin:$HOME/.cabal/bin:$PATH" >>"$GITHUB_ENV"
+        fi
+
     - name: Setup GHC
       if: inputs.ghc-version != ''
       shell: bash
