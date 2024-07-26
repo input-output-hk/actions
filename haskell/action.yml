@@ -92,7 +92,10 @@ runs:
       run: |
         cabal help user-config
 
-        if [ "$(printf "3.10\n${{ inputs.cabal-version }}" | sort --version-sort | head -n 1)" = "3.10" ] && [ -n "$XDG_CONFIG_HOME" ]; then
+        if cabal path; then
+          # cabal >= 3.12 has `cabal path` command
+          echo "cabal-store=$(cabal path --store)" | tee -a "$GITHUB_OUTPUT"
+        elif [ "$(printf "3.10\n${{ inputs.cabal-version }}" | sort --version-sort | head -n 1)" = "3.10" ] && [ -n "$XDG_CONFIG_HOME" ]; then
           echo "Using xdg-config"
           cabal_config_file="$XDG_CONFIG_HOME/cabal/config"
           echo "cabal-store=$HOME/.local/state/cabal/store" | tee -a "$GITHUB_OUTPUT"
