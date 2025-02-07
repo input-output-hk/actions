@@ -1,0 +1,53 @@
+name: 'Nix Cache'
+description: 'Treat the GitHub cache as a local Nix binary cache'
+
+inputs:
+  signing-private-key:
+    description: 'Secret key for signing store paths'
+    required: true
+  path:
+    description: 'A list of files, directories, and wildcard patterns to cache and restore'
+    required: true
+  key:
+    description: 'An explicit key for restoring and saving the cache'
+    required: true
+  restore-keys:
+    description: 'An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Nix cache
+      run: |
+        # Write out secret key
+        echo "${{ inputs.signing-private-key }}" > "${{ runner.temp }}/nix-cache-secret.key"
+
+        # Write out script
+        cat <<EOF > "${{ runner.temp }}/post-build.sh"
+          #!/bin/sh
+          set -eux
+          set -f         # Disable globbing
+          export IFS=' ' # Separate paths by space
+          # Add nix executables to PATH
+          export PATH="$PATH:/nix/var/nix/profiles/default/bin"
+
+          echo "Signing paths" \$OUT_PATHS
+          nix store sign --key-file ${{ runner.temp }}/nix-cache-secret.key --recursive \$OUT_PATHS
+
+          echo "Uploading paths" \$OUT_PATHS
+          nix copy --to "file://${{ runner.temp }}/nix-binary-cache" \$OUT_PATHS
+        EOF
+
+        # Make it executable
+        chmod +x "${{ runner.temp }}/post-build.sh"
+
+        # Prepopulate nix cache dirs to avoid permission problems
+        mkdir -p "${{ runner.temp }}/nix-binary-cache/nar"
+
+    - name: Cache Nix
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.path }}
+          key: ${{ inputs.key }}
+          restore-keys: ${{ inputs.restore-keys }}
