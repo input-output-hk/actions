@@ -19,6 +19,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Nix cache
+      shell: bash
       run: |
         # Write out secret key
         echo "${{ inputs.signing-private-key }}" > "${{ runner.temp }}/nix-cache-secret.key"
@@ -46,8 +47,8 @@ runs:
         mkdir -p "${{ runner.temp }}/nix-binary-cache/nar"
 
     - name: Cache Nix
-        uses: actions/cache@v4
-        with:
-          path: ${{ inputs.path }}
-          key: ${{ inputs.key }}
-          restore-keys: ${{ inputs.restore-keys }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
