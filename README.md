@@ -64,3 +64,26 @@ This action will set GHC and Cabal as needed
     ghc-version: ${{ matrix.ghc }}
     cabal-version: 3.10.1.0
 ```
+
+## `basic-nix-cache` action
+
+This action will set up a GitHub cache as a local Nix binary cache:
+
+```
+- name: Install Nix
+  uses: cachix/install-nix-action@v30
+  with:
+    extra_nix_config: |
+      extra-substituters = file://${{ runner.temp }}/nix-binary-cache
+      extra-trusted-public-keys = ${{ env.NIX_SIGNING_PUBLIC_KEY }}
+      post-build-hook = ${{ runner.temp }}/post-build.sh
+
+- name: Cache Nix
+  uses: input-output-hk/actions/basic-nix-cache
+  with:
+    signing-private-key: ${{ env.NIX_SIGNING_PRIVATE_KEY }}
+    path: ${{ runner.temp }}/nix-binary-cache
+    key: ${{ runner.os }}-nix-cache-${{ hashFiles('flake.lock', 'Cargo.lock') }}
+    restore-keys: |
+      ${{ runner.os }}-nix-cache-
+```
