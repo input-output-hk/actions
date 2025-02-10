@@ -27,7 +27,7 @@ runs:
         # Write out script
         cat <<EOF > "${{ runner.temp }}/post-build.sh"
           #!/bin/sh
-          set -eux
+          set -eu
           set -f         # Disable globbing
           export IFS=' ' # Separate paths by space
           # Add nix executables to PATH
