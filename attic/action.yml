@@ -1,0 +1,78 @@
+name: Attic Cache Action
+description: |
+  Caches Nix build artifacts with Attic.
+
+inputs:
+  endpoint:
+    description: Endpoint of the Attic server
+    required: true
+
+  cache:
+    description: |
+      The cache to configure. This can be either This can be either `servername:cachename`
+      or `cachename`.
+    required: true
+
+  access_token:
+    description: The authentication token for pushing and accessing private caches
+    required: true
+
+  nix_path:
+    description: |
+      Set NIX_PATH environment variable for installing attic-client. For example:
+      `nixpkgs=channel:nixos-unstable`
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - name: Set up attic
+      shell: bash
+      run: |
+        if [[ -n "${{ inputs.nix_path }}" ]]; then
+          export NIX_PATH="${{ inputs.nix_path }}"
+        fi
+
+        # Nix binaries are not port of the root's $PATH
+        NIX_BIN_DIR="/nix/var/nix/profiles/default/bin"
+
+        # Install Attic client. Note that we we unset the post-build hook, because it
+        # would fail without attic
+        sudo --preserve-env=NIX_PATH "$NIX_BIN_DIR/nix-env" \
+          --install \
+          --option post-build-hook "" \
+          --file '<nixpkgs>' \
+          --attr attic-client
+
+        # Log into attic
+        attic login default "${{ inputs.endpoint }}" "${{ inputs.access_token }}"
+        attic use "${{ inputs.cache }}"
+
+    - name: Install post-build hook
+      shell: bash
+      run: |
+        # Create the post-build script
+        cat <<EOF > "${{ runner.temp }}/post-build.sh"
+        #!/bin/sh
+        set -euf
+
+        # Add nix executables to PATH
+        export PATH="\$PATH:/nix/var/nix/profiles/default/bin"
+        # Force attic to use the same config file from the post-build hook as it does
+        # outside of it. Note that $XDG_CONFIG_HOME gets expanded when we write this
+        # file, NOT when its executed.
+        export XDG_CONFIG_HOME=$XDG_CONFIG_HOME
+
+        if [ -n "\${OUT_PATHS:-}" ]; then
+          echo "Uploading paths" "\$OUT_PATHS"
+          exec attic push "${{ inputs.cache }}" \$OUT_PATHS
+        fi
+        EOF
+
+        # Make it executable
+        chmod +x "${{ runner.temp }}/post-build.sh"
+
+        # Install the post-build hook
+        sudo bash -c 'echo "post-build-hook = ${{ runner.temp }}/post-build.sh" >> /etc/nix/nix.conf'
+        sudo systemctl restart nix-daemon.service
