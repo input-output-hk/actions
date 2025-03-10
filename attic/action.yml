@@ -34,10 +34,10 @@ runs:
           export NIX_PATH="${{ inputs.nix_path }}"
         fi
 
-        # Nix binaries are not port of the root's $PATH
+        # Nix binaries are not part of the root's $PATH
         NIX_BIN_DIR="/nix/var/nix/profiles/default/bin"
 
-        # Install Attic client. Note that we we unset the post-build hook, because it
+        # Install Attic client. Note that we unset the post-build hook, because it
         # would fail without attic
         sudo --preserve-env=NIX_PATH "$NIX_BIN_DIR/nix-env" \
           --install \
@@ -67,6 +67,11 @@ runs:
         if [ -n "\${OUT_PATHS:-}" ]; then
           echo "Uploading paths" "\$OUT_PATHS"
           exec attic push "${{ inputs.cache }}" \$OUT_PATHS
+        fi
+
+        if [ -n "\${DRV_PATH:-}" ]; then
+          echo "Uploading derivation path" "$\DRV_PATH"
+          exec attic push "${{ inputs.cache }}" \$DRV_PATH"
         fi
         EOF
 
