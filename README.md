@@ -87,3 +87,22 @@ This action will set up a GitHub cache as a local Nix binary cache:
     restore-keys: |
       ${{ runner.os }}-nix-cache-
 ```
+
+## `attic` action
+
+This action sets up a remote Attic cache:
+
+```
+- name: Install Nix
+  uses: cachix/install-nix-action@v30
+  with:
+    nix_path: nixpkgs=channel:nixos-unstable
+    github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Cache Nix
+  uses: input-output-hk/actions/attic@latest
+  with:
+    endpoint: ${{ secrets.ATTIC_URL }}
+    cache: ${{ secrets.ATTIC_CACHE }}
+    access_token: ${{ secrets.ATTIC_TOKEN }}
+```
