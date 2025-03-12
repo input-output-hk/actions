@@ -71,7 +71,7 @@ runs:
 
         if [ -n "\${DRV_PATH:-}" ]; then
           echo "Uploading derivation path" "$\DRV_PATH"
-          exec attic push "${{ inputs.cache }}" \$DRV_PATH"
+          exec attic push "${{ inputs.cache }}" "\$DRV_PATH"
         fi
         EOF
 
