@@ -80,4 +80,9 @@ runs:
 
         # Install the post-build hook
         sudo bash -c 'echo "post-build-hook = ${{ runner.temp }}/post-build.sh" >> /etc/nix/nix.conf'
-        sudo systemctl restart nix-daemon.service
+
+        if [[ "${{ runner.os }}" = "Linux" ]]; then
+          sudo systemctl restart nix-daemon.service
+        elif [[ "${{ runner.os }}" = "macOS" ]]; then
+          sudo launchctl kickstart -k system/org.nixos.nix-daemon
+        fi
