@@ -59,6 +59,8 @@ runs:
         # TODO[sgillespie]: Remove me
         set -x
 
+        whoami
+
         # Add nix executables to PATH
         export PATH="\$PATH:/nix/var/nix/profiles/default/bin"
         # Force attic to use the same config file from the post-build hook as it does
