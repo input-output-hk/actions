@@ -49,6 +49,9 @@ runs:
         attic login default "${{ inputs.endpoint }}" "${{ inputs.access_token }}"
         attic use "${{ inputs.cache }}"
 
+        env | sort
+        ls -al $HOME 
+
     - name: Install post-build hook
       shell: bash
       run: |
@@ -60,6 +63,7 @@ runs:
         set -x
 
         whoami
+        env | sort
 
         # Add nix executables to PATH
         export PATH="\$PATH:/nix/var/nix/profiles/default/bin"
