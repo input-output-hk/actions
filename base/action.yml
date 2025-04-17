@@ -17,7 +17,7 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        brew install --overwrite pkg-config openssl@3.0
+        brew install --overwrite pkg-config openssl@3.0 lmdb
 
         mkdir __prep__
         pushd __prep__
@@ -62,7 +62,7 @@ runs:
         mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
         mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
 
-        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config
+        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-lmdb
 
         echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
@@ -113,7 +113,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get -y install libsystemd-dev
+        sudo apt-get -y install libsystemd-dev liblmdb-dev
 
         mkdir __prep__
         pushd __prep__
