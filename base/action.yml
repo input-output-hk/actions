@@ -113,7 +113,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get -y install libsystemd-dev liblmdb-dev
+        sudo apt-get -y install libsystemd-dev liblmdb-dev liburing-dev
 
         mkdir __prep__
         pushd __prep__
