@@ -6,6 +6,10 @@ inputs:
     type: string
     default: 'x86_64-linux'
 
+  channel:
+    description: 'Nix channel (e.g. nixos-25.05, nixos-unstable)'
+    default: 'nixos-25.05'
+
   target-platform:
     description: 'One of "" (native), "-static", "-windows" or "-js"'
     type: string
@@ -45,7 +49,7 @@ runs:
         extra_nix_config: |
           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
           substituters = https://cache.iog.io/ https://cache.zw3rk.com/ https://cache.nixos.org/
-        nix_path: nixpkgs=channel:nixos-unstable
+        nix_path: nixpkgs=channel:${{ inputs.channel }}
     - name: Install jq
       shell: bash
       run: |
