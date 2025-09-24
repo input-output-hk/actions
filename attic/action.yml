@@ -34,6 +34,15 @@ runs:
           export NIX_PATH="${{ inputs.nix_path }}"
         fi
 
+        # An empty access token is almost certainly a mistake, since it should be a JWT.
+        # It's still valid for pulling from a public cache, so we'll allow it, but emit a
+        # warning.
+        if [[ -z "${{ inputs.access_token }}" ]]; then
+          echo "::warning ::The provided access token is empty! Will not attempt to push."
+          echo "If you want to push to the Attic cache, please ensure you have provided a valid 'access_token' input parameter."
+          echo # Leave some extra space to make it more obvious
+        fi
+
         # Nix binaries are not part of the root's $PATH
         NIX_BIN_DIR="/nix/var/nix/profiles/default/bin"
 
@@ -52,6 +61,12 @@ runs:
     - name: Install post-build hook
       shell: bash
       run: |
+        # If the JWT token is empty or unspecified, pushing will always fail. Output
+        # another message that we aren't installing the hook
+        if [[ -z "${{ inputs.access_token }}" ]]; then
+          echo "::notice ::Cowardly refusing to install nix post-build hook without an Attic Cache token"
+        fi
+
         # Create the post-build script
         cat <<EOF > "${{ runner.temp }}/post-build.sh"
         #!/bin/sh
