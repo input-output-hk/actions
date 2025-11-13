@@ -41,6 +41,8 @@ runs:
           echo "::warning ::The provided access token is empty! Will not attempt to push."
           echo "If you want to push to the Attic cache, please ensure you have provided a valid 'access_token' input parameter."
           echo # Leave some extra space to make it more obvious
+
+          echo "NO_PUSH=1" >> "$GITHUB_ENV"
         fi
 
         # Nix binaries are not part of the root's $PATH
@@ -59,14 +61,9 @@ runs:
         attic use "${{ inputs.cache }}"
 
     - name: Install post-build hook
+      if: ${{ ! env.NO_PUSH }}
       shell: bash
       run: |
-        # If the JWT token is empty or unspecified, pushing will always fail. Output
-        # another message that we aren't installing the hook
-        if [[ -z "${{ inputs.access_token }}" ]]; then
-          echo "::notice ::Cowardly refusing to install nix post-build hook without an Attic Cache token"
-        fi
-
         # Create the post-build script
         cat <<EOF > "${{ runner.temp }}/post-build.sh"
         #!/bin/sh
