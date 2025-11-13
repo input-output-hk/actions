@@ -38,7 +38,7 @@ runs:
         # It's still valid for pulling from a public cache, so we'll allow it, but emit a
         # warning.
         if [[ -z "${{ inputs.access_token }}" ]]; then
-          echo "::warning ::The provided access token is empty! Will not attempt to push."
+          echo "::warning::The provided access token is empty! Will not attempt to push."
           echo "If you want to push to the Attic cache, please ensure you have provided a valid 'access_token' input parameter."
           echo # Leave some extra space to make it more obvious
 
