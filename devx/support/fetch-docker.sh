@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-TOKEN=$(curl --silent https://ghcr.io/token\?scope\=repository:$1:pull | jq -r .token)
+TOKEN=$(curl --silent --show-error "https://ghcr.io/token\?scope\=repository:$1:pull" | jq -r .token)
 
 # Read the manifest file from the docker image containing our nix-store closure and extract the layer url.
 BLOB=$(curl \
 --silent \
+--show-error \
 --request 'GET' \
 --header "Authorization: Bearer $TOKEN" \
 --header "Accept: application/vnd.docker.distribution.manifest.list.v2+json" \
