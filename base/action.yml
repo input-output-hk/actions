@@ -62,7 +62,7 @@ runs:
         mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
         mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
 
-        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-lmdb
+        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-lmdb mingw-w64-x86_64-openssl
 
         echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
@@ -90,8 +90,6 @@ runs:
           # fix the windows bindists. Thus for now we just use the older libblst on windows :see_no_evil:
           # curl -sL ${{ inputs.url-prefix }}/msys2.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
           curl -sL  https://github.com/input-output-hk/iohk-nix/releases/download/v2.2/msys2.libblst.pkg.tar.zstd > libblst.pkg.tar.zstd
-          # OpenSSL .pc files are wrong in openssl-3.3.0 https://github.com/openssl/openssl/issues/24298
-          curl -sL https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-openssl-3.6.0-1-any.pkg.tar.zst > openssl.pkg.tar.zstd
           for pkg in *.zstd; do
             /usr/bin/pacman --noconfirm -U $pkg
           done
