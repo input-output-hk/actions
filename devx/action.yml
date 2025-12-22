@@ -53,7 +53,7 @@ runs:
     - name: Install jq
       shell: bash
       run: |
-        curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o jq
+        curl -fL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o jq
         chmod +x jq
     - name: Download and import closure
       shell: bash

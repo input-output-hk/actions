@@ -21,9 +21,9 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sSL ${{ inputs.url-prefix }}/$(uname -m)-macos.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg > libsodium.pkg
-          curl -sSL ${{ inputs.url-prefix }}/$(uname -m)-macos.libsecp256k1.pkg > libsecp256k1.pkg
-          curl -sSL ${{ inputs.url-prefix }}/$(uname -m)-macos.libblst.pkg      > libblst.pkg
+          curl -fsSL ${{ inputs.url-prefix }}/$(uname -m)-macos.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg > libsodium.pkg
+          curl -fsSL ${{ inputs.url-prefix }}/$(uname -m)-macos.libsecp256k1.pkg > libsecp256k1.pkg
+          curl -fsSL ${{ inputs.url-prefix }}/$(uname -m)-macos.libblst.pkg      > libblst.pkg
           for pkg in *.pkg; do
             sudo installer -pkg $pkg -target /
           done
@@ -69,8 +69,8 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sSL ${{ inputs.url-prefix }}/msys2.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
-          curl -sSL ${{ inputs.url-prefix }}/msys2.libsecp256k1.pkg.tar.zstd > libsecp256k1.pkg.tar.zstd
+          curl -fsSL ${{ inputs.url-prefix }}/msys2.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
+          curl -fsSL ${{ inputs.url-prefix }}/msys2.libsecp256k1.pkg.tar.zstd > libsecp256k1.pkg.tar.zstd
           # For windows we need to rely on the v2.2 libblst, otherwise GHC's linker blows up due to
           #
           # GHC runtime linker: fatal error: I found a duplicate definition for symbol
@@ -88,8 +88,8 @@ runs:
           #
           # While we have this fixed in our custom GHCs in haskell.nix, it's not fixed upstream, and we can't trivially
           # fix the windows bindists. Thus for now we just use the older libblst on windows :see_no_evil:
-          # curl -sSL ${{ inputs.url-prefix }}/msys2.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
-          curl -sSL  https://github.com/input-output-hk/iohk-nix/releases/download/v2.2/msys2.libblst.pkg.tar.zstd > libblst.pkg.tar.zstd
+          # curl -fsSL ${{ inputs.url-prefix }}/msys2.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
+          curl -fsSL  https://github.com/input-output-hk/iohk-nix/releases/download/v2.2/msys2.libblst.pkg.tar.zstd > libblst.pkg.tar.zstd
           for pkg in *.zstd; do
             /usr/bin/pacman --noconfirm -U $pkg
           done
@@ -115,9 +115,9 @@ runs:
 
         mkdir __prep__
         pushd __prep__
-          curl -sSL ${{ inputs.url-prefix }}/debian.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.deb > libsodium.deb
-          curl -sSL ${{ inputs.url-prefix }}/debian.libsecp256k1.deb > libsecp256k1.deb
-          curl -sSL ${{ inputs.url-prefix }}/debian.libblst.deb      > libblst.deb
+          curl -fsSL ${{ inputs.url-prefix }}/debian.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.deb > libsodium.deb
+          curl -fsSL ${{ inputs.url-prefix }}/debian.libsecp256k1.deb > libsecp256k1.deb
+          curl -fsSL ${{ inputs.url-prefix }}/debian.libblst.deb      > libblst.deb
           for pkg in *.deb; do
             sudo dpkg -i $pkg
           done
