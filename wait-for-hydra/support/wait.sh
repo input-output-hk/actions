@@ -49,7 +49,8 @@ check_timeout() {
 
 poll_github() {
     if [ -n "$CHECK" ]; then
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs --paginate --jq '...select(.name == \"$CHECK\")...'"
+        # Debug output to stderr so it doesn't pollute the captured result.
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs --paginate --jq '...select(.name == \"$CHECK\")...'" >&2
         # Use tail -1 to handle paginated results that may concatenate
         # multiple values; take the last (most recent) non-empty line.
         gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs" \
@@ -57,7 +58,8 @@ poll_github() {
             --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion" \
             | tail -1
     else
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status --paginate --jq '...select(.context == \"$STATUS\")...'"
+        # Debug output to stderr so it doesn't pollute the captured result.
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status --paginate --jq '...select(.context == \"$STATUS\")...'" >&2
         gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status" \
             --paginate \
             --jq ".statuses[] | select(.context == \"$STATUS\") | .state" \
