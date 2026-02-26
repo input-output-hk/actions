@@ -4,22 +4,30 @@ inputs:
   check:
     description: 'Name of the hydra job when using GitHub Apps (check_runs)'
     default: ''
-  
+
   status:
     description: 'Name of the hydra job when using GitHub Statuses'
     default: ''
-  
+
   delay:
-    description: 'Delay in seconds after unsuccessful query.'
+    description: 'Initial delay in seconds after unsuccessful query.'
     default: 30
-  
+
   jitter:
     description: 'Jitter added to the delay. Maximum in seconds.'
     default: 30
 
+  timeout:
+    description: 'Maximum time in seconds to wait before giving up. 0 means no timeout.'
+    default: 3600
+
+  max-delay:
+    description: 'Maximum delay in seconds between polls (caps exponential backoff).'
+    default: 300
+
 runs:
-  using: "composite"  
-  steps:    
+  using: "composite"
+  steps:
   - name: Wait for Hydra Jobs ${{ inputs.check || inputs.status }}
     shell: bash
     env:
@@ -27,5 +35,7 @@ runs:
       STATUS: ${{ inputs.status }}
       DELAY: ${{ inputs.delay }}
       JITTER: ${{ inputs.jitter }}
-      RELEVANT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}      
+      TIMEOUT: ${{ inputs.timeout }}
+      MAX_DELAY: ${{ inputs.max-delay }}
+      RELEVANT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     run: ${{ github.action_path }}/support/wait.sh

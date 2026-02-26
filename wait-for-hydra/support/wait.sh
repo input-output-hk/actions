@@ -1,32 +1,103 @@
-# start with a random sleep to prevent hitting the api too hard.
+#!/usr/bin/env bash
+# wait-for-hydra: Wait for a Hydra CI build to reach a terminal state.
+#
+# Polls the GitHub API with exponential backoff until the specified
+# check-run or status reaches a terminal state.
+#
+# Exit codes:
+#   0 - build succeeded
+#   1 - build failed
+#   2 - timeout exceeded
+#
+# Copyright (c) Moritz Angermann <moritz.angermann@iohk.io>, Input Output Group.
+# SPDX-License-Identifier: Apache-2.0
+
+set -euo pipefail
+
+# --- Configuration -----------------------------------------------------------
+
 : "${DELAY:=30}"
 : "${JITTER:=30}"
-while true; do
-    if [ -z "$CHECK" ] && [ -z "$STATUS" ]; then (>&2 echo "Neither STATUS _or_ CHECK provided. Please provide one!"); exit 1; fi
-    if [ -n "$CHECK" ] && [ -n "$STATUS" ]; then (>&2 echo "STATUS _and_ CHECK provided. Please provide only one!"); exit 1; fi
-    # Note: we need --paginate because there are so many statuses
-    if [ -n "$CHECK" ]; then
-        # For GitHub Apps (checks)
-        HYDRA_JOB="$CHECK"
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs --paginate --jq '.check_runs[] | select(.name == \"$CHECK\") | .conclusion'"
-        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs" --paginate --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion")
-    else
-        # For GitHub Statuses
-        HYDRA_JOB="$STATUS"
-        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status --paginate --jq '.statuses[] | select(.context == \"$STATUS\") | .state'"
-        conclusion=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status" --paginate --jq ".statuses[] | select(.context == \"$STATUS\") | .state")
+: "${TIMEOUT:=3600}"
+: "${MAX_DELAY:=300}"
+
+# --- Validation --------------------------------------------------------------
+
+if [ -z "$CHECK" ] && [ -z "$STATUS" ]; then
+    echo "::error::Neither STATUS nor CHECK provided. Please provide one!" >&2
+    exit 1
+fi
+
+if [ -n "$CHECK" ] && [ -n "$STATUS" ]; then
+    echo "::error::Both STATUS and CHECK provided. Please provide only one!" >&2
+    exit 1
+fi
+
+HYDRA_JOB="${CHECK:-$STATUS}"
+
+# --- Helpers -----------------------------------------------------------------
+
+# Check if we've exceeded the timeout.
+check_timeout() {
+    if [ "$TIMEOUT" -gt 0 ] && [ "$SECONDS" -ge "$TIMEOUT" ]; then
+        echo "::error::Timeout after ${SECONDS}s waiting for $HYDRA_JOB"
+        exit 2
     fi
+}
+
+# --- Poll Mode ---------------------------------------------------------------
+
+poll_github() {
+    if [ -n "$CHECK" ]; then
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs --paginate --jq '...select(.name == \"$CHECK\")...'"
+        # Use tail -1 to handle paginated results that may concatenate
+        # multiple values; take the last (most recent) non-empty line.
+        gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/check-runs" \
+            --paginate \
+            --jq ".check_runs[] | select(.name == \"$CHECK\") | .conclusion" \
+            | tail -1
+    else
+        echo "Querying: gh api repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status --paginate --jq '...select(.context == \"$STATUS\")...'"
+        gh api "repos/$GITHUB_REPOSITORY/commits/$RELEVANT_SHA/status" \
+            --paginate \
+            --jq ".statuses[] | select(.context == \"$STATUS\") | .state" \
+            | tail -1
+    fi
+}
+
+# --- Main --------------------------------------------------------------------
+
+SECONDS=0
+iteration=0
+current_delay="$DELAY"
+
+echo "Waiting for $HYDRA_JOB on $RELEVANT_SHA (timeout=${TIMEOUT}s, max-delay=${MAX_DELAY}s)"
+
+while true; do
+    check_timeout
+    iteration=$((iteration + 1))
+
+    conclusion=$(poll_github)
+
     case "$conclusion" in
         success)
-            echo "$HYDRA_JOB succeeded"
-            exit 0;;
+            echo "$HYDRA_JOB succeeded (iteration $iteration, ${SECONDS}s elapsed)"
+            exit 0
+            ;;
         failure)
-            echo "$HYDRA_JOB failed"
-            exit 1;;
+            echo "$HYDRA_JOB failed (iteration $iteration, ${SECONDS}s elapsed)"
+            exit 1
+            ;;
         *)
-            echo "conclusion is: '$conclusion'"
-            WAIT=$((DELAY + RANDOM % JITTER))
-        echo "$HYDRA_JOB pending. Waiting ${WAIT}s..."
-        sleep $WAIT;;
+            wait_time=$((current_delay + RANDOM % (JITTER + 1)))
+            echo "$HYDRA_JOB pending (conclusion='$conclusion'). Iteration $iteration, ${SECONDS}s elapsed. Waiting ${wait_time}s..."
+            sleep "$wait_time"
+
+            # Exponential backoff: double the delay, cap at MAX_DELAY.
+            current_delay=$((current_delay * 2))
+            if [ "$current_delay" -gt "$MAX_DELAY" ]; then
+                current_delay="$MAX_DELAY"
+            fi
+            ;;
     esac
 done
