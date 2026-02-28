@@ -25,6 +25,10 @@ inputs:
     description: 'Maximum delay in seconds between polls (caps exponential backoff).'
     default: 300
 
+  hydra-status-url:
+    description: 'Optional URL of the hydra-github-bridge SSE endpoint (e.g. https://hydra-bridge.ci.iog.io). When set, uses SSE for real-time status instead of polling GitHub.'
+    default: ''
+
 runs:
   using: "composite"
   steps:
@@ -37,5 +41,6 @@ runs:
       JITTER: ${{ inputs.jitter }}
       TIMEOUT: ${{ inputs.timeout }}
       MAX_DELAY: ${{ inputs.max-delay }}
+      HYDRA_STATUS_URL: ${{ inputs.hydra-status-url }}
       RELEVANT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     run: ${{ github.action_path }}/support/wait.sh
