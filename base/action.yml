@@ -62,7 +62,7 @@ runs:
         mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
         mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
 
-        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-lmdb mingw-w64-x86_64-openssl
+        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-ucrt-x86_64-lmdb mingw-w64-x86_64-openssl
 
         echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
@@ -103,8 +103,8 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        "PATH=C:\\msys64\\mingw64\\opt\\cardano\\bin;C:\\msys64\\mingw64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
-        "PKG_CONFIG_PATH=C:\\msys64\\mingw64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\mingw64\\lib\\pkgconfig;C:\\msys64\\mingw64\\share\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
+        "PATH=C:\\msys64\\mingw64\\opt\\cardano\\bin;C:\\msys64\\mingw64\\bin;C:\\msys64\\ucrt64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
+        "PKG_CONFIG_PATH=C:\\msys64\\mingw64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\mingw64\\lib\\pkgconfig;C:\\msys64\\mingw64\\share\\pkgconfig;C:\\msys64\\ucrt64\\lib\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
 
     # Git for Windows refuses to create paths longer than 260 characters unless
     # core.longpaths is set. The repositories themselves stay under the limit, but
