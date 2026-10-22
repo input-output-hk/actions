@@ -40,17 +40,21 @@ runs:
         echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/opt/homebrew/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" \
           >> $GITHUB_ENV
 
+    # We use the MSYS2 CLANG64 environment: like GHC's Windows toolchain (since GHC 9.4) it is
+    # clang-based and links against UCRT. Libraries from the MINGW64 environment link against
+    # msvcrt.dll instead, so a process would load two C runtimes, each with its own heap, errno
+    # and stdio state.
+    #
     # On pkg-config: the MSYS `pkgconf` (`/usr/bin`, pulled in by `base-devel`) can't interpret a
-    # semicolon-separated `PKG_CONFIG_PATH`: for `C:/pathA;C:/pathB` it searches in `C`, `/pathA;C`
-    # and `/pathB`. `mingw-w64-x86_64-pkgconf` (the only pkg-config in MINGW64; it also provides the
-    # old `mingw-w64-x86_64-pkg-config` name) handles it, and also answers queries for multiple
-    # modversions as cabal makes them. It strips `C:/msys64/mingw64/{include,lib}` from the returned
-    # flags unless `PKG_CONFIG_ALLOW_SYSTEM_(CFLAGS|LIBS)` are set, as we do here.
+    # semicolon-separated `PKG_CONFIG_PATH`. `mingw-w64-clang-x86_64-pkgconf` (the only pkg-config
+    # in CLANG64) handles it, and also answers queries for multiple modversions as cabal makes them.
+    # We still set `PKG_CONFIG_ALLOW_SYSTEM_(CFLAGS|LIBS)` so `C:/msys64/clang64/{include,lib}` are
+    # never stripped from the returned flags.
     - name: "[windows] Install library dependencies"
       if: runner.os == 'Windows'
       shell: C:/msys64/usr/bin/bash.exe -e '{0}'
       env:
-        MSYSTEM: MINGW64
+        MSYSTEM: CLANG64
         # do not ever change to $HOME by yourself.
         CHERE_INVOKING: 1
         # do we want to inherit the path?
@@ -59,34 +63,16 @@ runs:
         mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
         mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
 
-        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkgconf mingw-w64-x86_64-openssl
+        /usr/bin/pacman --noconfirm -S mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-openssl
 
         echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
 
         mkdir __prep__
         pushd __prep__
-          curl -fsSL ${{ inputs.url-prefix }}/msys2.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
-          curl -fsSL ${{ inputs.url-prefix }}/msys2.libsecp256k1.pkg.tar.zstd > libsecp256k1.pkg.tar.zstd
-          # For windows we need to rely on the v2.2 libblst, otherwise GHC's linker blows up due to
-          #
-          # GHC runtime linker: fatal error: I found a duplicate definition for symbol
-          #    __blst_platform_cap
-          # whilst processing object file
-          #    C:\msys64\mingw64\opt\cardano\lib\libblst.a
-          # The symbol was previously defined in
-          #    C:\msys64\mingw64\opt\cardano\lib\libblst.a(#2:server.o)
-          # This could be caused by:
-          #    * Loading two different object files which export the same symbol
-          #    * Specifying the same object file twice on the GHCi command line
-          #    * An incorrect `package.conf' entry, causing some object to be
-          #      loaded twice.
-          # ghc-9.8.1.exe: Could not load Object Code C:\msys64\mingw64\opt\cardano\lib\libblst.a(#1:assembly.o).
-          #
-          # While we have this fixed in our custom GHCs in haskell.nix, it's not fixed upstream, and we can't trivially
-          # fix the windows bindists. Thus for now we just use the older libblst on windows :see_no_evil:
-          # curl -fsSL ${{ inputs.url-prefix }}/msys2.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
-          curl -fsSL  https://github.com/input-output-hk/iohk-nix/releases/download/v2.2/msys2.libblst.pkg.tar.zstd > libblst.pkg.tar.zstd
+          curl -fsSL ${{ inputs.url-prefix }}/clang64.${{ inputs.use-sodium-vrf == 'true' && 'libsodium-vrf' || 'libsodium' }}.pkg.tar.zstd > libsodium.pkg.tar.zstd
+          curl -fsSL ${{ inputs.url-prefix }}/clang64.libsecp256k1.pkg.tar.zstd > libsecp256k1.pkg.tar.zstd
+          curl -fsSL ${{ inputs.url-prefix }}/clang64.libblst.pkg.tar.zstd      > libblst.pkg.tar.zstd
           for pkg in *.zstd; do
             /usr/bin/pacman --noconfirm -U $pkg
           done
@@ -100,8 +86,8 @@ runs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        "PATH=C:\\msys64\\mingw64\\opt\\cardano\\bin;C:\\msys64\\mingw64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
-        "PKG_CONFIG_PATH=C:\\msys64\\mingw64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\mingw64\\lib\\pkgconfig;C:\\msys64\\mingw64\\share\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
+        "PATH=C:\\msys64\\clang64\\opt\\cardano\\bin;C:\\msys64\\clang64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
+        "PKG_CONFIG_PATH=C:\\msys64\\clang64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\clang64\\lib\\pkgconfig;C:\\msys64\\clang64\\share\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
 
     # Git for Windows refuses to create paths longer than 260 characters unless
     # core.longpaths is set. The repositories themselves stay under the limit, but
