@@ -40,15 +40,12 @@ runs:
         echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/opt/homebrew/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" \
           >> $GITHUB_ENV
 
-    # There are three pkg-config packages available for mingw, and each one has their problems:
-    #
-    # - `pacman -S pkgconf` (usually pulled by installing `base-devel`): can't interpret the `PKG_CONFIG_PATH` in a semicolon format.
-    #   For `PKG_CONFIG_PATH=C:/pathA;C:/pathB` it searches in `C`, `/pathA;C` and `/pathB`.
-    #
-    # - `pacman -S mingw-w64-x86_64-pkgconf`: when queried for multiple modversions (as cabal does), it will return only one.
-    #
-    # - `pacman -S mingw-w64-x86_64-pkg-config`: will strip out `C:/mingw64/lib` and `C:/mingw64/include` from the returned values
-    #   unless provided with `PKG_CONFIG_ALLOW_SYSTEM_(CFLAGS|LIBS)` as I do here.
+    # On pkg-config: the MSYS `pkgconf` (`/usr/bin`, pulled in by `base-devel`) can't interpret a
+    # semicolon-separated `PKG_CONFIG_PATH`: for `C:/pathA;C:/pathB` it searches in `C`, `/pathA;C`
+    # and `/pathB`. `mingw-w64-x86_64-pkgconf` (the only pkg-config in MINGW64; it also provides the
+    # old `mingw-w64-x86_64-pkg-config` name) handles it, and also answers queries for multiple
+    # modversions as cabal makes them. It strips `C:/msys64/mingw64/{include,lib}` from the returned
+    # flags unless `PKG_CONFIG_ALLOW_SYSTEM_(CFLAGS|LIBS)` are set, as we do here.
     - name: "[windows] Install library dependencies"
       if: runner.os == 'Windows'
       shell: C:/msys64/usr/bin/bash.exe -e '{0}'
@@ -62,7 +59,7 @@ runs:
         mv /c/Strawberry/perl/bin/pkg-config     /c/Strawberry/perl/bin/perl-pkg-config
         mv /c/Strawberry/perl/bin/pkg-config.bat /c/Strawberry/perl/bin/perl-pkg-config.bat
 
-        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkg-config mingw-w64-x86_64-openssl
+        /usr/bin/pacman --noconfirm -S mingw-w64-x86_64-pkgconf mingw-w64-x86_64-openssl
 
         echo "PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1" >> $GITHUB_ENV
         echo "PKG_CONFIG_ALLOW_SYSTEM_LIBS=1"   >> $GITHUB_ENV
