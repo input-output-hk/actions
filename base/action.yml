@@ -88,6 +88,11 @@ runs:
       run: |
         "PATH=C:\\msys64\\clang64\\opt\\cardano\\bin;C:\\msys64\\clang64\\bin;{0}" -f $env:PATH  >> $env:GITHUB_ENV
         "PKG_CONFIG_PATH=C:\\msys64\\clang64\\opt\\cardano\\lib\\pkgconfig;C:\\msys64\\clang64\\lib\\pkgconfig;C:\\msys64\\clang64\\share\\pkgconfig;C:\\msys64\\usr\\lib\\pkgconfig;C:\\msys64\\usr\\share\\pkgconfig;{0}" -f $env:PKG_CONFIG_PATH >> $env:GITHUB_ENV
+        # Git Bash (`shell: bash`) prepends its own mingw64\bin, which ships OpenSSL, zlib, ...,
+        # to PATH. Bash sources BASH_ENV after that, so our libraries come first again.
+        $bashEnv = "$env:RUNNER_TEMP/iog-base-env.sh" -replace '\\', '/'
+        [IO.File]::WriteAllText($bashEnv, 'export PATH="/c/msys64/clang64/opt/cardano/bin:/c/msys64/clang64/bin:$PATH"' + "`n")
+        "BASH_ENV=$bashEnv" >> $env:GITHUB_ENV
 
     # Git for Windows refuses to create paths longer than 260 characters unless
     # core.longpaths is set. The repositories themselves stay under the limit, but
