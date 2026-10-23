@@ -67,25 +67,29 @@ runs:
         # Create the post-build script
         cat <<EOF > "${{ runner.temp }}/post-build.sh"
         #!/bin/sh
-        set -euf
+        set -uf
 
         # Add nix executables to PATH
         export PATH="\$PATH:/nix/var/nix/profiles/default/bin"
 
         # Force attic to use the same config file from the post-build hook as it does
-        # outside of it. Note that $XDG_CONFIG_HOME gets expanded when we write this 
-        # file, NOT when its executed. This trick does not seem to work in macOS, so we'll have to 
+        # outside of it. Note that $XDG_CONFIG_HOME gets expanded when we write this
+        # file, NOT when its executed. This trick does not seem to work in macOS, so we'll have to
         # fallback to a known good value.
         export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-~runner/.config}
 
         if [ -n "\${OUT_PATHS:-}" ]; then
           echo "Uploading paths" "\$OUT_PATHS"
-          exec attic push "${{ inputs.cache }}" \$OUT_PATHS
+          if ! attic push "${{ inputs.cache }}" \$OUT_PATHS 2>&1; then
+            echo "WARNING: failed to push paths to attic cache" >&2
+          fi
         fi
 
         if [ -n "\${DRV_PATH:-}" ]; then
-          echo "Uploading derivation path" "$\DRV_PATH"
-          exec attic push "${{ inputs.cache }}" "\$DRV_PATH"
+          echo "Uploading derivation path" "\$DRV_PATH"
+          if ! attic push "${{ inputs.cache }}" "\$DRV_PATH" 2>&1; then
+            echo "WARNING: failed to push derivation to attic cache" >&2
+          fi
         fi
         EOF
 
