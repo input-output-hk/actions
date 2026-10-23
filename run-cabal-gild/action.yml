@@ -1,0 +1,30 @@
+name: 'Run cabal-gild'
+description: 'Check formatting of Cabal code with cabal-gild'
+inputs:
+  follow-symbolic-links:
+    required: false
+    description: >
+      Whether to follow symbolic links.
+    default: true
+  extra-args:
+    required: false
+    description: >
+      Extra arguments to pass to Fourmolu.
+  version:
+    required: false
+    description: >
+      The version number of cabal-gild to use. Defaults to "latest". Example
+      version numbers -- `0.13.0.0`, `0.10.1.0`, etc. See
+      https://github.com/tfausak/cabal-gild/releases for a list of all releases.
+    default: latest
+  working-directory:
+    description: >
+      Directory in which to run cabal-gild.  This also affects how the `pattern`
+      argument is interpretted, with Glob patterns being relative to this
+      `working-directory` argument.
+
+      Defaults to the repository root if not set.
+    required: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
