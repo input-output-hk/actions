@@ -17,7 +17,7 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        brew install --overwrite pkg-config openssl@3.0
+        brew install --overwrite pkg-config openssl@3
 
         mkdir __prep__
         pushd __prep__
@@ -35,9 +35,9 @@ runs:
       shell: bash
       run: |
         echo "LD_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
-        # Note: we add both /opt/homebrew/opt and /usr/local/opt for homebrews openssl@3.0, this is
+        # Note: we add both /opt/homebrew/opt and /usr/local/opt for homebrews openssl@3, this is
         #       because different GitHub Runner at different revisions have different homebrew opt layouts.
-        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/opt/homebrew/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/openssl@3.0/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" \
+        echo "PKG_CONFIG_PATH=/usr/local/opt/cardano/lib/pkgconfig:/opt/homebrew/opt/openssl@3/lib/pkgconfig:/usr/local/opt/openssl@3/lib/pkgconfig:/usr/local/opt/icu4c/lib/pkgconfig:$PKG_CONFIG_PATH" \
           >> $GITHUB_ENV
 
     # We use the MSYS2 CLANG64 environment: like GHC's Windows toolchain (since GHC 9.4) it is
