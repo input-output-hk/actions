@@ -1,0 +1,36 @@
+{
+  "name": "run-cabal-gild",
+  "description": "Check formatting of Cabal code with cabal-gild.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "ncc build index.js -o dist",
+    "all": "npm run prepare"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/actions.git"
+  },
+  "keywords": [
+    "formatter",
+    "cabal"
+  ],
+  "author": "original: Mark Karpov, fourmolu port: Bitnomial, cabal-gild port: Javier Sagredo",
+  "license": "BSD 3 clause",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.0",
+    "@actions/glob": "^0.4.0",
+    "@actions/http-client": "^2.2.0",
+    "@actions/tool-cache": "^2.0.1",
+    "@vercel/ncc": "^0.38.1",
+    "ncc": "^0.3.6"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1"
+  },
+  "bugs": {
+    "url": "https://github.com/input-output-hk/actions/issues"
+  },
+  "homepage": "https://github.com/input-output-hk/actions#readme"
+}
